@@ -1,0 +1,7 @@
+id,label,obsolete
+"string","String","0"
+"integer","Integer","0"
+"double","Double","0"
+"boolean","Boolean","0"
+"date","Date","0"
+"blob","Blob","0"

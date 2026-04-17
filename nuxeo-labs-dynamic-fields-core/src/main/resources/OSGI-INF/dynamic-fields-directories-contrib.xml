@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<component name="nuxeo.labs.dynamic.fields.directories">
+
+  <extension target="org.nuxeo.ecm.directory.GenericDirectory" point="directories">
+    <directory name="dynf_field_types" extends="template-vocabulary">
+      <dataFile>data/directories/dynf_field_types.csv</dataFile>
+    </directory>
+  </extension>
+
+</component>
