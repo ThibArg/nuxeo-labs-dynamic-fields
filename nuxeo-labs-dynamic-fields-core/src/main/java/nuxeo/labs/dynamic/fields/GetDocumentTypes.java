@@ -18,18 +18,23 @@
  */
 package nuxeo.labs.dynamic.fields;
 
+import org.nuxeo.ecm.automation.AutomationService;
+import org.nuxeo.ecm.automation.OperationContext;
+import org.nuxeo.ecm.automation.OperationException;
 import org.nuxeo.ecm.automation.core.Constants;
 import org.nuxeo.ecm.automation.core.annotations.Context;
 import org.nuxeo.ecm.automation.core.annotations.Operation;
 import org.nuxeo.ecm.automation.core.annotations.OperationMethod;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModelList;
+import org.nuxeo.ecm.core.api.NuxeoException;
 
 /**
  * Returns all {@code CustomSchemaDef} documents for the current customer,
  * ordered by {@code csd:defForTyp}.
  * <p>
- * The customer ID is currently hard-coded for testing purposes.
+ * The customer ID is resolved by calling the {@code DynamicFields.GetCustomerId}
+ * operation, which can be overridden in Studio to provide custom resolution logic.
  *
  * @since 2025.1
  */
@@ -40,18 +45,28 @@ public class GetDocumentTypes {
 
     public static final String ID = "DynamicFields.GetDocumentTypes";
 
-    // Hard-coded for testing — will later be read from user profile
-    private static final String CUSTOMER_ID = "ABCD-1234";
-
     @Context
     protected CoreSession session;
 
+    @Context
+    protected AutomationService automationService;
+
     @OperationMethod
     public DocumentModelList run() {
+        String customerId = resolveCustomerId();
         var query = "SELECT * FROM CustomSchemaDef"
-                + " WHERE csd:customerId = '%s'".formatted(CUSTOMER_ID.replace("'", "\\'"))
+                + " WHERE csd:customerId = '%s'".formatted(customerId.replace("'", "\\'"))
                 + " AND ecm:isTrashed = 0 AND ecm:isVersion = 0 AND ecm:isProxy = 0"
                 + " ORDER BY csd:defForTyp ASC";
         return session.query(query);
+    }
+
+    protected String resolveCustomerId() {
+        try {
+            var ctx = new OperationContext(session);
+            return (String) automationService.run(ctx, GetCustomerId.ID);
+        } catch (OperationException e) {
+            throw new NuxeoException("Failed to resolve customer ID via " + GetCustomerId.ID, e);
+        }
     }
 }

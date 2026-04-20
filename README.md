@@ -14,9 +14,35 @@ A Nuxeo LTS 2025 plugin that implements an Entity-Attribute-Value (EAV) pattern,
 - **`CustomSchemaDef`**: A document type that holds field definitions for a specific customer and document type. One per customer per document type combination. Stored inside a `CustomSchemaDefContainer` folder.
 - **`DynamicFields` facet**: Add this facet to any document type (via Studio or XML contribution) to give it dynamic field capabilities. The facet carries the `dynamic-fields` schema.
 
-### Operation
+### Operations
 
-- **`DynamicFields.GetDocumentTypes`**: Returns all `CustomSchemaDef` documents for the current customer. Used internally by the UI widgets — not intended for direct use.
+- **`DynamicFields.GetCustomerId`**: Returns the customer ID for the current user. The default implementation returns a hard-coded value (`ABCD-1234`) for development and testing. **You must override this operation** in production — see [Customer ID Resolution](#customer-id-resolution) below.
+- **`DynamicFields.GetDocumentTypes`**: Returns all `CustomSchemaDef` documents for the current customer (resolved via `GetCustomerId`). Used internally by the UI widgets — not intended for direct use.
+
+## Customer ID Resolution
+
+Both schemas use a `customerId` field to associate data with a specific customer. The customer ID is resolved at runtime by the `DynamicFields.GetCustomerId` operation, which you **must override** in your Studio project to match your multi-tenancy model.
+
+To override, create an **Automation Scripting** in Nuxeo Studio with the operation ID `DynamicFields.GetCustomerId`. For example, if the customer ID is stored in the user's `company` field:
+
+```javascript
+// Automation Scripting — Operation ID: DynamicFields.GetCustomerId
+function run(input, params) {
+  return currentUser.getPropertyValue("user:company");
+}
+```
+
+Studio contributions load after plugin bundles, so your Automation Scripting automatically replaces the default implementation.
+
+## ACLs and Permissions
+
+This plugin does **not** manage permissions. It is the responsibility of the developer using this plugin to set up proper ACLs so that:
+
+- Each customer's users can only **create, read, update, and delete** their own `CustomSchemaDef` documents
+- Each customer's users can only access documents that belong to them
+- Admin/operator users who need cross-customer access have the appropriate permissions
+
+Typically, you would organize `CustomSchemaDefContainer` folders with ACLs restricting access per customer, and apply similar permission policies to the documents carrying the `DynamicFields` facet.
 
 ## Using Dynamic Fields in Document Layouts
 
@@ -145,16 +171,10 @@ useful for the Nuxeo Platform in general, they will be integrated directly into 
 [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 ## About Nuxeo
-Nuxeo Platform is an open source Content Services platform, written in Java. Data can be stored in both SQL & NoSQL
-databases.
+Nuxeo Platform is an open source highly scalable, cloud-native, enterprise content management product with rich multimedia support, written in Java. Data can be stored in both SQL & NoSQL databases.
 
 The development of the Nuxeo Platform is mostly done by Nuxeo employees with an open development model.
 
 The source code, documentation, roadmap, issue tracker, testing, benchmarks are all public.
 
-Typically, Nuxeo users build different types of information management solutions
-for [document management](https://www.nuxeo.com/solutions/document-management/), [case management](https://www.nuxeo.com/solutions/case-management/),
-and [digital asset management](https://www.nuxeo.com/solutions/dam-digital-asset-management/), use cases. It uses
-schema-flexible metadata & content models that allows content to be repurposed to fulfill future use cases.
-
-More information is available at [www.nuxeo.com](https://www.nuxeo.com).
+More information is available at [Hyland/Nuxeo](https://www.hyland.com/en/solutions/products/nuxeo-platform).
