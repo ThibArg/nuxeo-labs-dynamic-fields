@@ -1,5 +1,11 @@
 # nuxeo-labs-dynamic-fields
 
+> [!CAUTION]
+> This repo has been forked to https://github.com/nuxeo-sandbox/nuxeo-labs-dynamic-fields and will not be maintained in this repo
+
+<hr>
+<hr>
+
 A Nuxeo LTS 2025 plugin that implements an Entity-Attribute-Value (EAV) pattern, allowing customers to define custom fields per document type without creating actual schema fields in the database. Designed for multi-tenant scenarios where each customer can have their own set of dynamic fields on any document type.
 
 > [!IMPORTANT]
