@@ -31,6 +31,7 @@ import org.nuxeo.ecm.automation.core.annotations.OperationMethod;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.runtime.api.Framework;
+import org.nuxeo.runtime.services.config.ConfigurationService;
 
 /**
  * Returns the customer ID for the current user.
@@ -82,7 +83,8 @@ public class GetCustomerId {
 
     @OperationMethod
     public String run() {
-        String chainId = Framework.getProperty(CHAIN_PROPERTY);
+        var configurationService = Framework.getService(ConfigurationService.class);
+        String chainId = configurationService.getString(CHAIN_PROPERTY, null);
 
         if (StringUtils.isBlank(chainId)) {
             if (!warnLogged) {
