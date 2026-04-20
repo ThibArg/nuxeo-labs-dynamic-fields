@@ -7,17 +7,18 @@ Layout block for viewing dynamic field values on documents with the DynamicField
 <dom-module id="dynamic-fields-view">
   <template>
     <style include="nuxeo-styles">
+      /* Called ininsde a nuxeo-...-layout, the card has a 16px padding,
+        lets go back to zero to align with other elements */
+      nuxeo-card {
+        padding: 0;
+      }
+
       .dynamic-field {
         margin-bottom: 8px;
       }
-      .field-label {
-        color: var(--secondary-text-color);
-        font-size: 12px;
-        font-weight: 400;
-      }
-      .field-value {
-        font-size: 14px;
-        margin-top: 4px;
+
+      .dynamic-fields {
+        margin-left: 16px;
       }
     </style>
 
@@ -30,84 +31,87 @@ Layout block for viewing dynamic field values on documents with the DynamicField
     </nuxeo-document>
 
     <template is="dom-if" if="[[hasFacet(document, 'DynamicFields')]]" restamp>
-      <nuxeo-card heading="Dynamic Fields">
+      <nuxeo-card heading="Schema: [[_schemaDef.title]]">
+        <div class="dynamic-fields">
 
-        <template is="dom-if" if="[[!_hasDefinition(_schemaDef)]]">
-          <p>No schema definition linked.</p>
-        </template>
-
-        <template is="dom-if" if="[[_hasDefinition(_schemaDef)]]">
-
-          <div class="dynamic-field">
-            <label>Type</span>
-            <div class="field-value">[[_schemaDef.properties.csd:defForTyp]]</div>
-          </div>
-
-          <template is="dom-repeat" items="[[_getFieldDefinitions(_schemaDef)]]" as="fieldDef">
-
-            <!-- String -->
-            <template is="dom-if" if="[[_isType(fieldDef, 'string')]]">
-              <div class="dynamic-field">
-                <label>[[fieldDef.fieldName]]</label>
-                <div class="field-value">[[_getFieldValue(fieldDef.fieldName, document.properties.dynf:values, 'stringValue')]]</div>
-              </div>
-            </template>
-
-            <!-- Integer -->
-            <template is="dom-if" if="[[_isType(fieldDef, 'integer')]]">
-              <div class="dynamic-field">
-                <label>[[fieldDef.fieldName]]</label>
-                <div class="field-value">[[_getFieldValue(fieldDef.fieldName, document.properties.dynf:values, 'integerValue')]]</div>
-              </div>
-            </template>
-
-            <!-- Double -->
-            <template is="dom-if" if="[[_isType(fieldDef, 'double')]]">
-              <div class="dynamic-field">
-                <label>[[fieldDef.fieldName]]</label>
-                <div class="field-value">[[_getFieldValue(fieldDef.fieldName, document.properties.dynf:values, 'doubleValue')]]</div>
-              </div>
-            </template>
-
-            <!-- Boolean -->
-            <template is="dom-if" if="[[_isType(fieldDef, 'boolean')]]">
-              <div class="dynamic-field">
-                <label>[[fieldDef.fieldName]]</label>
-                <paper-checkbox checked="[[_getFieldValue(fieldDef.fieldName, document.properties.dynf:values, 'booleanValue')]]" disabled="true" name="aBool"></paper-checkbox>
-              </div>
-            </template>
-
-            <!-- Date -->
-            <template is="dom-if" if="[[_isType(fieldDef, 'date')]]">
-              <div class="dynamic-field">
-                <label>[[fieldDef.fieldName]]</label>
-                <div class="field-value">
-                  <nuxeo-date datetime="[[_getFieldValue(fieldDef.fieldName, document.properties.dynf:values, 'dateValue')]]"></nuxeo-date>
-                </div>
-              </div>
-            </template>
-
-            <!-- Blob -->
-            <template is="dom-if" if="[[_isType(fieldDef, 'blob')]]">
-              <div class="dynamic-field">
-                <label>[[fieldDef.fieldName]]</label>
-                <div class="field-value">
-                  <template is="dom-if" if="[[_getFieldValue(fieldDef.fieldName, document.properties.dynf:values, 'blobValue')]]">
-                    <nuxeo-document-blob
-                      role="widget"
-                      document="[[document]]"
-                      xpath="dynf:values/[[_findValueIndex(fieldDef.fieldName)]]/blobValue"
-                    ></nuxeo-document-blob>
-                  </template>
-                  <template is="dom-if" if="[[!_getFieldValue(fieldDef.fieldName, document.properties.dynf:values, 'blobValue')]]">
-                    —
-                  </template>
-                </div>
-              </div>
-            </template>
-
+          <template is="dom-if" if="[[!_hasDefinition(_schemaDef)]]">
+            <p>No schema definition linked.</p>
           </template>
-        </template>
+
+          <template is="dom-if" if="[[_hasDefinition(_schemaDef)]]">
+
+            <div class="dynamic-field">
+              <label>Type</span>
+              <div >[[_schemaDef.properties.csd:defForTyp]]</div>
+            </div>
+
+            <template is="dom-repeat" items="[[_getFieldDefinitions(_schemaDef)]]" as="fieldDef">
+
+              <!-- String -->
+              <template is="dom-if" if="[[_isType(fieldDef, 'string')]]">
+                <div class="dynamic-field">
+                  <label>[[fieldDef.fieldName]]</label>
+                  <div >[[_getFieldValue(fieldDef.fieldName, document.properties.dynf:values, 'stringValue')]]</div>
+                </div>
+              </template>
+
+              <!-- Integer -->
+              <template is="dom-if" if="[[_isType(fieldDef, 'integer')]]">
+                <div class="dynamic-field">
+                  <label>[[fieldDef.fieldName]]</label>
+                  <div >[[_getFieldValue(fieldDef.fieldName, document.properties.dynf:values, 'integerValue')]]</div>
+                </div>
+              </template>
+
+              <!-- Double -->
+              <template is="dom-if" if="[[_isType(fieldDef, 'double')]]">
+                <div class="dynamic-field">
+                  <label>[[fieldDef.fieldName]]</label>
+                  <div >[[_getFieldValue(fieldDef.fieldName, document.properties.dynf:values, 'doubleValue')]]</div>
+                </div>
+              </template>
+
+              <!-- Boolean -->
+              <template is="dom-if" if="[[_isType(fieldDef, 'boolean')]]">
+                <div class="dynamic-field">
+                  <label>[[fieldDef.fieldName]]</label>
+                  <paper-checkbox checked="[[_getFieldValue(fieldDef.fieldName, document.properties.dynf:values, 'booleanValue')]]" disabled="true" name="aBool"></paper-checkbox>
+                </div>
+              </template>
+
+              <!-- Date -->
+              <template is="dom-if" if="[[_isType(fieldDef, 'date')]]">
+                <div class="dynamic-field">
+                  <label>[[fieldDef.fieldName]]</label>
+                  <div >
+                    <nuxeo-date datetime="[[_getFieldValue(fieldDef.fieldName, document.properties.dynf:values, 'dateValue')]]"></nuxeo-date>
+                  </div>
+                </div>
+              </template>
+
+              <!-- Blob -->
+              <template is="dom-if" if="[[_isType(fieldDef, 'blob')]]">
+                <div class="dynamic-field">
+                  <label>[[fieldDef.fieldName]]</label>
+                  <div >
+                    <template is="dom-if" if="[[_getFieldValue(fieldDef.fieldName, document.properties.dynf:values, 'blobValue')]]">
+                      <nuxeo-document-blob
+                        role="widget"
+                        document="[[document]]"
+                        xpath="dynf:values/[[_findValueIndex(fieldDef.fieldName)]]/blobValue"
+                      ></nuxeo-document-blob>
+                    </template>
+                    <template is="dom-if" if="[[!_getFieldValue(fieldDef.fieldName, document.properties.dynf:values, 'blobValue')]]">
+                      —
+                    </template>
+                  </div>
+                </div>
+              </template>
+
+            </template>
+          </template>
+
+        </div>
 
       </nuxeo-card>
     </template>
