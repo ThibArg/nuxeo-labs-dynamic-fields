@@ -2,6 +2,12 @@
 
 A Nuxeo LTS 2025 plugin that implements an Entity-Attribute-Value (EAV) pattern, allowing customers to define custom fields per document type without creating actual schema fields in the database. Designed for multi-tenant scenarios where each customer can have their own set of dynamic fields on any document type.
 
+> [!IMPORTANT]
+> (See below for details)
+* This requires to  use the Nested File Type of Elastic/Opensearch, which means **you must deploy the `dynamic-fields-opensearch` configuration template**.
+* We implement this **only for OpenSearch**, but you can easily also create the Elasticsearch part of you need
+
+
 ## Concepts
 
 ### Schemas
@@ -25,10 +31,10 @@ Both schemas use a `customerId` field to associate data with a specific customer
 
 By default, if no configuration is provided, the operation returns a hard-coded value (`ABCD-1234`) and logs a warning once. To provide your own resolution logic:
 
-1. Create an **Automation Scripting** in Nuxeo Studio (e.g. named `DynamicFields_GetCustomerId`) that returns the customer ID as a string. For example, if the customer ID is stored in the user's `company` field:
+1. Create an **Automation Scripting** in Nuxeo Studio (e.g. named `utils_GetCustomerId`) that returns the customer ID as a string. For example, if the customer ID is stored in the user's `company` field:
 
     ```javascript
-    // Automation Scripting name: DynamicFields_GetCustomerId
+    // Automation Scripting name: utils_GetCustomerId
     function run(input, params) {
       return currentUser.getPropertyValue("user:company");
     }
@@ -38,7 +44,7 @@ By default, if no configuration is provided, the operation returns a hard-coded 
 
     ```xml
     <extension target="org.nuxeo.runtime.ConfigurationService" point="configuration">
-      <property name="dynamicfields.customerid.chain">javascript.DynamicFields_GetCustomerId</property>
+      <property name="dynamicfields.customerid.chain">javascript.utils_GetCustomerId</property>
     </extension>
     ```
 
@@ -46,9 +52,11 @@ The configured chain is called every time the customer ID is needed (e.g. when l
 
 ## ACLs and Permissions
 
-This plugin does **not** manage permissions. It is the responsibility of the developer using this plugin to set up proper ACLs so that:
+This plugin does **not** manage permissions. It is the responsibility of the developer/administrators/etc. using this plugin to set up proper ACLs so that, typically:
 
-- Each customer's users can only **create, read, update, and delete** their own `CustomSchemaDef` documents
+- Only some customer's users can only **create, read, update, and delete** their own `CustomSchemaDef` documents
+  - (Or a higher level admin.)
+- Each customer's users can read these `CustomSchemaDef` (so they are displayed in a list for example)
 - Each customer's users can only access documents that belong to them
 - Admin/operator users who need cross-customer access have the appropriate permissions
 
@@ -59,6 +67,9 @@ Typically, you would organize `CustomSchemaDefContainer` folders with ACLs restr
 ### Edit Layout
 
 Import the `dynamic-fields-edit` widget and add it to your document's edit layout. For example, to add dynamic fields to the Picture edit layout:
+
+> [!IMPORTANT]
+> Do not forget the `{{ }}` double binding.
 
 ```html
 <link rel="import" href="../../forms/dynamic-fields-edit.html">
@@ -131,6 +142,9 @@ Then re-index your content from the Nuxeo Admin > Elasticsearch page.
 
 2. In **Studio Designer**, create the search form and result layouts for your page provider. In the search form layout HTML, import and add the dynamic fields search widget:
 
+> [!IMPORTANT]
+> Do not forget the `{{ }}` double binding.
+
 ```html
 <link rel="import" href="../../forms/dynf-search-form.html">
 
@@ -155,6 +169,10 @@ The `dynf-search-form` widget:
 - Automatically builds and sets the `dynf_search` named parameter on `params`, which flows to the PageProvider alongside all standard Studio predicates
 
 The plugin also registers a default `dynf_search` page provider (in `dynamic-fields-pageproviders.xml`) that can be used directly via REST API without Studio configuration.
+
+## Tuning/Overriding
+
+To tune the misc. layouts provided, just recreate the same at the same location in the `ui` folder.
 
 ## How to build
 ```bash
