@@ -1,7 +1,7 @@
 # nuxeo-labs-dynamic-fields
 
 > [!CAUTION]
-> This repo has been forked to https://github.com/nuxeo-sandbox/nuxeo-labs-dynamic-fields and will not be maintained in this repo
+> This repo has been forked to https://github.com/nuxeo-sandbox/nuxeo-labs-dynamic-fields and the code will not be maintained in this repo
 
 <hr>
 <hr>
